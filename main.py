@@ -5,8 +5,82 @@ import numpy as np
 f = lambda x: exp(sin(x) * log(x))
 
 
-def parabola(f, epsilon, x0):
-    x = [x0]
+def dichotomy(f, epsilon, a, b):
+    x = []
+
+    while b - a > epsilon:
+        m = (a + b) / 2
+        if f(m + epsilon) < f(m - epsilon):
+            a = m
+        else:
+            b = m
+
+        x.append(m)
+
+    return x
+
+
+def gold(f, epsilon, a, b):
+    x = []
+    cg = (3 - 5 ** 0.5) / 2
+
+    x1 = a + (b - a) * cg
+    x2 = b - (b - a) * cg
+    f1 = f(x1)
+    f2 = f(x2)
+    while b - a > epsilon:
+        if f1 < f2:
+            b = x2
+            x2 = x1
+            f2 = f1
+            x1 = a + (b - a) * cg
+            f1 = f(x1)
+        else:
+            a = x1
+            x1 = x2
+            f1 = f2
+            x2 = b - (b - a) * cg
+            f2 = f(x2)
+        x.append((x1 + x2) / 2)
+
+    return x
+
+
+def fibonacci(f, epsilon, a, b):
+    x = []
+    cg = (1 + 5 ** 0.5) / 2
+    fib = lambda n: (cg ** n - (-cg) ** -n) / (2 * cg - 1)
+
+    # вычислим количество итераций, которые дают заданную точность
+    n = round((log((b - a) / epsilon) + log(5 ** 0.5)) / log(cg))
+
+    x1 = a + fib(n - 2) / fib(n) * (b - a)
+    x2 = a + fib(n - 1) / fib(n) * (b - a)
+    f1 = f(x1)
+    f2 = f(x2)
+    k = 1
+
+    while k < n - 2:
+        if f1 < f2:
+            b = x2
+            x2 = x1
+            f2 = f1
+            x1 = a + fib(n - k - 2) / fib(n - k) * (b - a)
+            f1 = f(x1)
+        else:
+            a = x1
+            x1 = x2
+            f1 = f2
+            x2 = a + fib(n - k - 1) / fib(n - k) * (b - a)
+            f2 = f(x2)
+        x.append((x1 + x2) / 2)
+        k += 1
+
+    return x
+
+
+def parabola(f, epsilon, a, b):
+    x = [(b + a) / 2]
     h = epsilon
     while True:
         x_prev = x[-1]
@@ -103,12 +177,17 @@ def brent(f, epsilon, a, b):
     return x_arr
 
 
-# x = parabola(f, 1e-6, 5.5)
-x = brent(f, 1e-6, 3, 8)
+x = parabola(f, 1e-6, 3, 8)
+# x = brent(f, 1e-6, 3, 8)
+# x = dichotomy(f, 1e-6, 3, 8)
+# x = gold(f, 1e-6, 3, 8)
+# x = fibonacci(f, 1e-6, 3, 7)
+
 print(x)
 print(len(x))
 r = np.arange(0.1, 10, 0.001)
 plt.plot(r, list(map(f, r)))
 plt.scatter(x, list(map(f, x)))
 plt.scatter(x[-1], f(x[-1]))
+plt.grid()
 plt.show()
