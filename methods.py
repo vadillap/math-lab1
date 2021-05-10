@@ -1,8 +1,5 @@
-from math import exp, sin, log
-from matplotlib import pyplot as plt
 import numpy as np
-
-f = lambda x: exp(sin(x) * log(x))
+from math import log
 
 
 def dichotomy(f, epsilon, a, b):
@@ -176,18 +173,17 @@ def brent(f, epsilon, a, b):
         x_arr.append(x)
     return x_arr
 
-
-x = parabola(f, 1e-6, 3, 8)
-# x = brent(f, 1e-6, 3, 8)
-# x = dichotomy(f, 1e-6, 3, 8)
-# x = gold(f, 1e-6, 3, 8)
-# x = fibonacci(f, 1e-6, 3, 7)
-
-print(x)
-print(len(x))
-r = np.arange(0.1, 10, 0.001)
-plt.plot(r, list(map(f, r)))
-plt.scatter(x, list(map(f, x)))
-plt.scatter(x[-1], f(x[-1]))
-plt.grid()
-plt.show()
+# x = parabola(f, 1e-6, 3, 8)
+# # x = brent(f, 1e-6, 3, 8)
+# # x = dichotomy(f, 1e-6, 3, 8)
+# # x = gold(f, 1e-6, 3, 8)
+# # x = fibonacci(f, 1e-6, 3, 7)
+#
+# print(x)
+# print(len(x))
+# r = np.arange(0.1, 10, 0.001)
+# plt.plot(r, list(map(f, r)))
+# plt.scatter(x, list(map(f, x)))
+# plt.scatter(x[-1], f(x[-1]))
+# plt.grid()
+# plt.show()
