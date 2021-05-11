@@ -108,6 +108,18 @@ def draw_all(f, methods):
     plt.show()
 
 
+def task1():
+    f = lambda x: exp(sin(x) * log(x))
+    x_range = (1, 9)
+    epsilon = 1e-6
+
+    for method in methods:
+        x = method["method"](f, epsilon, *x_range)
+        x_min, y_min = x[-1], f(x[-1])
+
+        print(f"{method['name']}: X min = {x_min} Y min = {y_min}")
+
+
 def task2():
     f = lambda x: exp(sin(x) * log(x))
 
@@ -118,7 +130,7 @@ def task2():
 
 
 def task3():
-    f = lambda x: 5 * x ** 2 + x ** 3 + sin(5 * x) * 7
+    f = lambda x: 5 * x ** 2 + x ** 3 + sin(5 * x)
 
     epsilon = 1e-7
     x_range = np.array((-2, 2))
@@ -177,5 +189,6 @@ def task3():
 
 
 if __name__ == '__main__':
+    task1()
     task2()
     task3()
