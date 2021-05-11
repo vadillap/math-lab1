@@ -77,14 +77,44 @@ def fibonacci(f, epsilon, a, b):
 
 
 def parabola(f, epsilon, a, b):
-    x = [(b + a) / 2]
-    h = epsilon
-    while True:
-        x_prev = x[-1]
-        x_next = x_prev - 0.5 * h * (f(x_prev + h) - f(x_prev - h)) / (f(x_prev + h) - 2 * f(x_prev) + f(x_prev - h))
-        x.append(x_next)
+    x = []
 
-        if abs(x_next - x_prev) < epsilon:
+    x1 = a
+    x2 = (a + b) / 2
+    x3 = b
+
+    f1 = f(x1)
+    f2 = f(x2)
+    f3 = f(x3)
+
+    x.append(x2)
+
+    while True:
+        u = x2 - 0.5 * ((x2 - x1) ** 2 * (f2 - f3) - (x2 - x3) ** 2 * (f2 - f1)) / (
+                (x2 - x1) * (f2 - f3) - (x2 - x3) * (f2 - f1))
+
+        fu = f(u)
+
+        if fu < f2:
+            if u < x2:
+                x3 = x2
+                f3 = f2
+            else:
+                x1 = x2
+                f1 = f2
+            x2 = u
+            f2 = fu
+        else:
+            if u < x2:
+                x3 = u
+                f3 = fu
+            else:
+                x1 = u
+                f1 = fu
+
+        x.append(u)
+
+        if abs(x[-2] - x[-1]) < epsilon:
             break
 
     return x
@@ -172,18 +202,3 @@ def brent(f, epsilon, a, b):
 
         x_arr.append(x)
     return x_arr
-
-# x = parabola(f, 1e-6, 3, 8)
-# # x = brent(f, 1e-6, 3, 8)
-# # x = dichotomy(f, 1e-6, 3, 8)
-# # x = gold(f, 1e-6, 3, 8)
-# # x = fibonacci(f, 1e-6, 3, 7)
-#
-# print(x)
-# print(len(x))
-# r = np.arange(0.1, 10, 0.001)
-# plt.plot(r, list(map(f, r)))
-# plt.scatter(x, list(map(f, x)))
-# plt.scatter(x[-1], f(x[-1]))
-# plt.grid()
-# plt.show()
