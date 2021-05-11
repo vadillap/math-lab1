@@ -1,4 +1,5 @@
 from math import exp, sin, log
+from numpy import average
 from queue import Queue
 
 from matplotlib import pyplot as plt, cycler
@@ -117,18 +118,25 @@ def task2():
 
 
 def task3():
-    f = lambda x: 5 * x ** 2 + x ** 3 + sin(x * 5) * 5
+    f = lambda x: 5 * x ** 2 + x ** 3 + sin(5 * x) * 7
 
-    epsilon = 1e-6
+    epsilon = 1e-7
     x_range = np.array((-2, 2))
+
+    fig, ax = plt.subplots()
+    axins = ax.inset_axes([0.5, 0.5, 0.47, 0.47])
+
     x_values = np.arange(*(x_range * 2), 1e-3)
     y_values = list(map(f, x_values))
-
-    plt.plot(x_values, y_values)
+    ax.plot(x_values, y_values)
 
     markercycle = cycler(marker=['o', '+', 'x', '*', 'X'])
     colorcycle = cycler(color=['blue', 'orange', 'green', 'magenta', "red"])
     plt.gca().set_prop_cycle(colorcycle + markercycle)
+    axins.set_prop_cycle(colorcycle + markercycle)
+
+    x_mins = []
+    y_mins = []
 
     for method in methods:
         q = Queue()
@@ -144,9 +152,24 @@ def task3():
             continue
 
         x = q.get()
-        x_min = x[-1]
-        y_min = f(x[-1])
-        plt.plot(x_min, y_min, label=method["name"], linestyle="")
+        x_min, y_min = x[-1], f(x[-1])
+        x_mins.append(x_min)
+        y_mins.append(y_min)
+        ax.plot(x_min, y_min, label=method["name"], linestyle="")
+        axins.plot(x_min, y_min, label=method["name"], linestyle="")
+
+    x_avg, y_avg = average(x_mins), average(y_mins)
+    x_len = abs(max(x_mins) - min(x_mins))
+    y_len = abs(max(y_mins) - min(y_mins))
+
+    x1, x2, y1, y2 = x_avg - x_len, x_avg + x_len, y_avg - y_len, y_avg + y_len
+    axins.set_xlim(x1, x2)
+    axins.set_ylim(y1, y2)
+
+    x_values = np.arange(x1, x2, (x2 - x1) * 1e-3)
+    y_values = list(map(f, x_values))
+    axins.plot(x_values, y_values, "-", color="lightblue", zorder=0)
+    ax.indicate_inset_zoom(axins)
 
     plt.legend()
     plt.grid()
