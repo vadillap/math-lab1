@@ -1,6 +1,32 @@
 from math import exp, sin, log
-from matplotlib import pyplot as plt
+from queue import Queue
+
+from matplotlib import pyplot as plt, cycler
 from methods import *
+from threading import Thread
+
+methods = (
+    {
+        "method": dichotomy,
+        "name": "Дихотомия",
+    },
+    {
+        "method": gold,
+        "name": "Золотое сечение",
+    },
+    {
+        "method": fibonacci,
+        "name": "Фиббоначи",
+    },
+    {
+        "method": parabola,
+        "name": "Парабола",
+    },
+    {
+        "method": brent,
+        "name": "Брент",
+    },
+)
 
 
 # обертка, чтобы считать кол-во вызовов функции
@@ -84,34 +110,49 @@ def draw_all(f, methods):
 def task2():
     f = lambda x: exp(sin(x) * log(x))
 
-    methods = (
-        {
-            "method": dichotomy,
-            "name": "Дихотомия",
-        },
-        {
-            "method": gold,
-            "name": "Золотое сечение",
-        },
-        {
-            "method": fibonacci,
-            "name": "Фиббоначи",
-        },
-        {
-            "method": parabola,
-            "name": "Парабола",
-        },
-        {
-            "method": brent,
-            "name": "Брент",
-        },
-    )
-
     for method in methods:
         draw_individual(f, method)
 
     draw_all(f, methods)
 
 
+def task3():
+    f = lambda x: 5 * x ** 2 + x ** 3 + sin(x * 5) * 5
+
+    epsilon = 1e-6
+    x_range = np.array((-2, 2))
+    x_values = np.arange(*(x_range * 2), 1e-3)
+    y_values = list(map(f, x_values))
+
+    plt.plot(x_values, y_values)
+
+    markercycle = cycler(marker=['o', '+', 'x', '*', 'X'])
+    colorcycle = cycler(color=['blue', 'orange', 'green', 'magenta', "red"])
+    plt.gca().set_prop_cycle(colorcycle + markercycle)
+
+    for method in methods:
+        q = Queue()
+        t = Thread(
+            target=lambda q, args: q.put(method["method"](*args)),
+            args=(q, (f, epsilon, *x_range)))
+        t.daemon = True
+        t.start()
+        t.join(timeout=2.0)
+
+        if t.is_alive():
+            print(f'{method["name"]} не сходится')
+            continue
+
+        x = q.get()
+        x_min = x[-1]
+        y_min = f(x[-1])
+        plt.plot(x_min, y_min, label=method["name"], linestyle="")
+
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+
 if __name__ == '__main__':
     task2()
+    task3()
