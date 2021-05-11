@@ -1,5 +1,4 @@
 from math import exp, sin, log
-import numpy as np
 from matplotlib import pyplot as plt
 from methods import *
 
@@ -24,7 +23,7 @@ class Counter:
         self._calls = 0
 
 
-def epsilon_dependency(f, method, epsilon_range=np.arange(1e-10, 1e-1, 1e-5), x_range=(0.1, 10)):
+def epsilon_dependency(f, method, epsilon_range=np.arange(1e-10, 1e-1, 1e-5), x_range=(2, 7)):
     counter = Counter(f)
     wrapped_f = counter.func()
 
@@ -43,8 +42,8 @@ def epsilon_dependency(f, method, epsilon_range=np.arange(1e-10, 1e-1, 1e-5), x_
     return epsilon_x, iterations_y, calls_y
 
 
-def draw_individual(f, method, title):
-    epsilon_x, iterations_y, calls_y = epsilon_dependency(f, method)
+def draw_individual(f, method):
+    epsilon_x, iterations_y, calls_y = epsilon_dependency(f, method["method"])
 
     plt.plot(epsilon_x, iterations_y, label="Итерации")
     plt.plot(epsilon_x, calls_y, label="Вызовы функций")
@@ -52,7 +51,7 @@ def draw_individual(f, method, title):
     plt.xscale("log")
     plt.gca().invert_xaxis()
 
-    plt.title(title)
+    plt.title(method["name"])
     plt.xlabel("Точность")
     plt.ylabel("Количество")
     plt.legend()
@@ -61,25 +60,57 @@ def draw_individual(f, method, title):
 
 
 def draw_all(f, methods):
+    fig, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
+    fig.set_figheight(fig.get_figheight() * 1.5)
     for method in methods:
-        epsilon_x, iterations_y, calls_y = epsilon_dependency(f, method)
-        plt.plot(epsilon_x, iterations_y)
-        # plt.plot(epsilon_x, calls_y)
+        epsilon_x, iterations_y, calls_y = epsilon_dependency(f, method["method"])
+        ax1.plot(epsilon_x, iterations_y, label=method["name"])
+        ax2.plot(epsilon_x, calls_y, label=method["name"])
 
-    plt.xscale("log")
-    plt.gca().invert_xaxis()
+    ax1.set_xscale("log")
+    ax1.invert_xaxis()
+    ax1.grid()
+    ax2.grid()
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2),
+               fancybox=True, shadow=True, ncol=3)
 
     plt.xlabel("Точность")
-    plt.ylabel("Количество")
-    plt.grid()
+    ax1.set_ylabel("Итерации")
+    ax2.set_ylabel("Вызовы функции")
+    fig.tight_layout()
     plt.show()
 
 
 def task2():
     f = lambda x: exp(sin(x) * log(x))
-    draw_individual(f, gold, "Золтое сечение")
 
-    draw_all(f, (gold, dichotomy, fibonacci, brent))
+    methods = (
+        {
+            "method": dichotomy,
+            "name": "Дихотомия",
+        },
+        {
+            "method": gold,
+            "name": "Золотое сечение",
+        },
+        {
+            "method": fibonacci,
+            "name": "Фиббоначи",
+        },
+        {
+            "method": parabola,
+            "name": "Парабола",
+        },
+        {
+            "method": brent,
+            "name": "Брент",
+        },
+    )
+
+    for method in methods:
+        draw_individual(f, method)
+
+    draw_all(f, methods)
 
 
 if __name__ == '__main__':
